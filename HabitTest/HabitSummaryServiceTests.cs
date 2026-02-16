@@ -1,4 +1,4 @@
-﻿using HabbitHole.Data;
+﻿using HabitHole.Data;
 using HabitHole.Models;
 using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;

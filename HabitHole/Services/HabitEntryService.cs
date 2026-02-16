@@ -1,4 +1,4 @@
-﻿using HabbitHole.Data;
+﻿using HabitHole.Data;
 using HabitHole.Models;
 using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +31,10 @@ public class HabitEntryService : IHabitEntryService
 
     public async Task AddEntryAsync(int habitId, DateOnly date)
     {
+        var habitExists = await _context.Habits.AnyAsync(h => h.Id == habitId);
+        if (!habitExists)
+            throw new KeyNotFoundException("Habit not found");
+
         var exists = await _context.HabitEntries.AnyAsync(e =>
             e.HabitId == habitId &&
             e.Date == date);

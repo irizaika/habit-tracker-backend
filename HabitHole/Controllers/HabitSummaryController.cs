@@ -1,4 +1,4 @@
-﻿using HabbitHole.Data;
+﻿using HabitHole.Data;
 using HabitHole.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

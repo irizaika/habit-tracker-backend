@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitHole", "..\HabitHoleBackend\HabitHole\HabitHole.csproj", "{0896DA9C-F6CE-435F-90EA-BDF751CC4348}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitHole", "HabitHole\HabitHole.csproj", "{0896DA9C-F6CE-435F-90EA-BDF751CC4348}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitTest", "..\HabitHoleBackend\HabitTest\HabitTest.csproj", "{E10EEA09-23C7-4EE7-85ED-1ABBDFABF478}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HabitTest", "HabitTest\HabitTest.csproj", "{E10EEA09-23C7-4EE7-85ED-1ABBDFABF478}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

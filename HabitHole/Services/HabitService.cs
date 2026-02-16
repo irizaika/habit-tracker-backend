@@ -1,16 +1,19 @@
-﻿using HabbitHole.Data;
+﻿using HabitHole.Data;
 using HabitHole.Models;
 using HabitHole.Models.Dto;
 using HabitHole.Services;
+using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 public class HabitService : IHabitService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDateProvider _dateTime;
 
-    public HabitService(ApplicationDbContext context)
+    public HabitService(ApplicationDbContext context, IDateProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<IEnumerable<HabitDto>> GetHabitsAsync(int year, int month)
@@ -32,7 +35,7 @@ public class HabitService : IHabitService
             Name = name,
             GoalCount = goal,
             GoalPeriodType = GoalPeriodType.MONTH,
-            CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+            CreatedAt = _dateTime.Today,
             ValidFrom = from,
             ValidTo = to
         };

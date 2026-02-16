@@ -1,4 +1,4 @@
-using HabbitHole.Data;
+using HabitHole.Data;
 using HabitHole.Services;
 using HabitHole.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

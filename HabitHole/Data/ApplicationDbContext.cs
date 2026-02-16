@@ -1,7 +1,7 @@
 ﻿using HabitHole.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HabbitHole.Data
+namespace HabitHole.Data
 {
     public class ApplicationDbContext : DbContext
     {
