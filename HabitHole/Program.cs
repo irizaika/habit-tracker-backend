@@ -20,6 +20,7 @@ builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<Mapper, Mapper>();
 builder.Services.AddScoped<IHabitEntryService, HabitEntryService>();
 builder.Services.AddScoped<IHabitSummaryService, HabitSummaryService>();
+builder.Services.AddScoped<IDateProvider, DateProvider>();
 
 builder.Services.AddControllers();
 

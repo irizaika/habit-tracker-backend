@@ -1,14 +1,17 @@
 ﻿using HabbitHole.Data;
 using HabitHole.Models.Dto;
+using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 public class HabitSummaryService : IHabitSummaryService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDateProvider _dateProvider;
 
-    public HabitSummaryService(ApplicationDbContext context)
+    public HabitSummaryService(ApplicationDbContext context, IDateProvider dateProvider)
     {
         _context = context;
+        _dateProvider = dateProvider;
     }
 
     public async Task<IEnumerable<HabitMonthlySummaryDto>> GetMonthlySummaryAsync(
@@ -18,7 +21,7 @@ public class HabitSummaryService : IHabitSummaryService
         if (!DateOnly.TryParse($"{month}-01", out var firstDay))
             throw new ArgumentException("Invalid month format");
 
-        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var now = _dateProvider.Today;
 
         var start = firstDay;
         var end = firstDay.AddMonths(1).AddDays(-1);
@@ -96,7 +99,7 @@ public class HabitSummaryService : IHabitSummaryService
 
     public async Task<int> GetUpdatedStreakAsync(int habitId)
     {
-        var now = DateOnly.FromDateTime(DateTime.UtcNow);
+        var now = _dateProvider.Today;
 
         var entries = await _context.HabitEntries
             .Where(e => e.HabitId == habitId && e.Date <= now)
