@@ -1,10 +1,12 @@
 ﻿using HabitHole.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HabitHole.Controllers
 {
     [ApiController]
     [Route("api/habits/{habitId}/entries")]
+    [Authorize]
     public class HabitEntriesController : ControllerBase
     {
         private readonly IHabitEntryService _service;

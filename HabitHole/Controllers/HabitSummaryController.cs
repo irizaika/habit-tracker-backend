@@ -1,13 +1,12 @@
-﻿using HabitHole.Data;
-using HabitHole.Models.Dto;
-using Microsoft.AspNetCore.Http;
+﻿using HabitHole.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HabitHole.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class HabitSummaryController : ControllerBase
     {
         private readonly IHabitSummaryService _service;

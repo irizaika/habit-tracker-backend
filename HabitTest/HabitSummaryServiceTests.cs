@@ -6,13 +6,18 @@ using Moq;
 
 public class HabitSummaryServiceTests
 {
+    private readonly string UserId = Guid.NewGuid().ToString();
+
     private ApplicationDbContext GetDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        return new ApplicationDbContext(options);
+        var mockCurrentUser = new Mock<ICurrentUserService>();
+        mockCurrentUser.Setup(x => x.UserId).Returns(UserId);
+
+        return new ApplicationDbContext(options, mockCurrentUser.Object);
     }
 
     private HabitSummaryService CreateService(ApplicationDbContext context, DateOnly fixedToday)
@@ -34,7 +39,7 @@ public class HabitSummaryServiceTests
         // Arrange
         var context = GetDbContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 10 };
+        var habit = new Habit { Name = "Test", GoalCount = 10, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -63,7 +68,7 @@ public class HabitSummaryServiceTests
         // Arrange
         var context = GetDbContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 10 };
+        var habit = new Habit { Name = "Test", GoalCount = 10, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -92,7 +97,7 @@ public class HabitSummaryServiceTests
         // Arrange
         var context = GetDbContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 10 };
+        var habit = new Habit { Name = "Test", GoalCount = 10, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -139,7 +144,8 @@ public class HabitSummaryServiceTests
             Name = "Old Habit",
             GoalCount = 10,
             ValidFrom = new DateOnly(2024, 1, 1),
-            ValidTo = new DateOnly(2024, 1, 31)
+            ValidTo = new DateOnly(2024, 1, 31),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -162,7 +168,8 @@ public class HabitSummaryServiceTests
             Name = "Old Habit",
             GoalCount = 10,
             ValidFrom = new DateOnly(2024, 1, 1),
-            ValidTo = new DateOnly(2024, 1, 31)
+            ValidTo = new DateOnly(2024, 1, 31),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -185,7 +192,8 @@ public class HabitSummaryServiceTests
         {
             Name = "Reading",
             GoalCount = 10,
-            ValidFrom = new DateOnly(2025, 1, 1)
+            ValidFrom = new DateOnly(2025, 1, 1),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -218,7 +226,8 @@ public class HabitSummaryServiceTests
         {
             Name = "Workout",
             GoalCount = 10,
-            ValidFrom = fixedToday.AddMonths(-1)
+            ValidFrom = fixedToday.AddMonths(-1),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -248,7 +257,8 @@ public class HabitSummaryServiceTests
         {
             Name = "Test",
             GoalCount = 5,
-            ValidFrom = new DateOnly(2025, 2, 1)
+            ValidFrom = new DateOnly(2025, 2, 1),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);

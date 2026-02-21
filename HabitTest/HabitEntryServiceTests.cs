@@ -1,17 +1,23 @@
 ﻿using HabitHole.Data;
 using HabitHole.Models;
+using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
+using Moq;
 
 public class HabitEntryServiceTests
 {
+    private readonly string UserId = Guid.NewGuid().ToString();
+
     private ApplicationDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        return new ApplicationDbContext(options);
+        var mockCurrentUser = new Mock<ICurrentUserService>();
+        mockCurrentUser.Setup(x => x.UserId).Returns(UserId);
+
+        return new ApplicationDbContext(options, mockCurrentUser.Object);
     }
 
     private HabitEntryService CreateService(ApplicationDbContext context)
@@ -34,7 +40,7 @@ public class HabitEntryServiceTests
     {
         var context = CreateContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 5 };
+        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -59,7 +65,7 @@ public class HabitEntryServiceTests
     {
         var context = CreateContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 5 };
+        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -79,7 +85,7 @@ public class HabitEntryServiceTests
     {
         var context = CreateContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 5 };
+        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -105,7 +111,7 @@ public class HabitEntryServiceTests
     {
         var context = CreateContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 5 };
+        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 
@@ -130,7 +136,7 @@ public class HabitEntryServiceTests
     {
         var context = CreateContext();
 
-        var habit = new Habit { Name = "Test", GoalCount = 5 };
+        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
         context.Habits.Add(habit);
         await context.SaveChangesAsync();
 

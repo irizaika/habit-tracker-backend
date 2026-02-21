@@ -3,7 +3,7 @@
   "defaultVariables": null,
   "documentGenerator": {
     "aspNetCoreToOpenApi": {
-      "project": "HabitHole.csproj",
+      "project": "Authentication.csproj",
       "documentName": "v1",
       "msBuildProjectExtensionsPath": null,
       "configuration": "Debug",
@@ -69,7 +69,7 @@
       "convertConstructorInterfaceData": false,
       "importRequiredTypes": true,
       "useGetBaseUrlMethod": false,
-      "baseUrlTokenName": "API_BASE_URL",
+      "baseUrlTokenName": "AUTH_API_BASE_URL",
       "queryNullValue": "",
       "useAbortSignal": true,
       "inlineNamedDictionaries": false,
@@ -78,7 +78,7 @@
       "templateDirectory": null,
       "serviceHost": null,
       "serviceSchemes": null,
-      "output": "../../habit-hole-ui/src/api/habitHoleApi.ts",
+      "output": "../../habit-hole-ui/src/api/authApi.ts",
       "newLineBehavior": "Auto"
     }
   }

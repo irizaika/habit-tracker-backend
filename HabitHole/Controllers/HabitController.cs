@@ -1,4 +1,5 @@
 using HabitHole.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HabitHole.Controllers
@@ -6,6 +7,7 @@ namespace HabitHole.Controllers
     [ApiController]
     // [Route("[controller]")]
     [Route("api/habits")]
+    [Authorize]
     public class HabitController : ControllerBase
     {       
         private readonly IHabitService _habitService;

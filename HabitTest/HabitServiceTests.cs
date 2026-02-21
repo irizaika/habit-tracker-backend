@@ -6,13 +6,18 @@ using Moq;
 
 public class HabitServiceTests
 {
+    private readonly string UserId = Guid.NewGuid().ToString();
+
     private ApplicationDbContext GetDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        return new ApplicationDbContext(options);
+        var mockCurrentUser = new Mock<ICurrentUserService>();
+        mockCurrentUser.Setup(x => x.UserId).Returns(UserId);
+
+        return new ApplicationDbContext(options, mockCurrentUser.Object);
     }
 
     private HabitService CreateService(ApplicationDbContext context, DateOnly fixedToday)
@@ -37,7 +42,8 @@ public class HabitServiceTests
         {
             Name = "Deleted",
             GoalCount = 5,
-            IsDeleted = true
+            IsDeleted = true,
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -59,13 +65,15 @@ public class HabitServiceTests
                 {
                     Name = "Deleted",
                     GoalCount = 5,
-                    IsDeleted = true
+                    IsDeleted = true,
+                    UserId = UserId
                 },
                 new Habit
                 {
                     Name = "Active",
                     GoalCount = 5,
-                    IsDeleted = false
+                    IsDeleted = false, 
+                    UserId = UserId
                 }
             };
 
@@ -111,7 +119,8 @@ public class HabitServiceTests
         {
             Name = "Old",
             GoalCount = 5,
-            ValidFrom = new DateOnly(2025, 1, 1)
+            ValidFrom = new DateOnly(2025, 1, 1),
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -159,7 +168,8 @@ public class HabitServiceTests
         var habit = new Habit
         {
             Name = "Test",
-            GoalCount = 5
+            GoalCount = 5,
+            UserId = UserId
         };
 
         context.Habits.Add(habit);
@@ -183,7 +193,8 @@ public class HabitServiceTests
         var habit = new Habit
         {
             Name = "Test",
-            GoalCount = 5
+            GoalCount = 5,
+            UserId = UserId
         };
 
         context.Habits.Add(habit);

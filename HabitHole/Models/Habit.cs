@@ -18,6 +18,8 @@ namespace HabitHole.Models
         public DateOnly? ValidTo { get; set; } = null;
         public bool IsDeleted { get; set; } = false;
 
+        public string UserId { get; set; } = null!;
+
         public ICollection<HabitEntry> Entries { get; set; } = [];
     }
 }
