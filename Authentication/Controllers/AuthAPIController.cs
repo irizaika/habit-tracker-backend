@@ -1,5 +1,5 @@
 ﻿using Authentication.Models.Dto;
-using Authentication.Service.IService;
+using Authentication.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Authentication.Controllers
@@ -10,7 +10,7 @@ namespace Authentication.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthAPIController(IAuthService authService, IConfiguration configuration)
+        public AuthAPIController(IAuthService authService)
         {
             _authService = authService;
 

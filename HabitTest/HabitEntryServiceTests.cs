@@ -1,175 +1,176 @@
 ﻿using HabitHole.Data;
 using HabitHole.Models;
+using HabitHole.Services;
 using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
-public class HabitEntryServiceTests
+namespace HabitTest
 {
-    private readonly string UserId = Guid.NewGuid().ToString();
-
-    private ApplicationDbContext CreateContext()
+    public class HabitEntryServiceTests
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        private readonly string UserId = Guid.NewGuid().ToString();
 
-        var mockCurrentUser = new Mock<ICurrentUserService>();
-        mockCurrentUser.Setup(x => x.UserId).Returns(UserId);
-
-        return new ApplicationDbContext(options, mockCurrentUser.Object);
-    }
-
-    private HabitEntryService CreateService(ApplicationDbContext context)
-    {
-        return new HabitEntryService(context);
-    }
-
-    [Fact]
-    public async Task GetEntriesAsync_InvalidMonth_ShouldThrow()
-    {
-        var context = CreateContext();
-        var service = CreateService(context);
-
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.GetEntriesAsync(1, "invalid"));
-    }
-
-    [Fact]
-    public async Task GetEntriesAsync_Should_Return_Only_Month_Entries()
-    {
-        var context = CreateContext();
-
-        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
-        context.Habits.Add(habit);
-        await context.SaveChangesAsync();
-
-        context.HabitEntries.AddRange(
-            new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 1, 5) },
-            new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 1, 10) },
-            new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 2, 1) } // different month
-        );
-
-        await context.SaveChangesAsync();
-
-        var service = CreateService(context);
-
-        var result = await service.GetEntriesAsync(habit.Id, "2025-01");
-
-        Assert.Equal(2, result.Count);
-        Assert.DoesNotContain(new DateOnly(2025, 2, 1), result);
-    }
-
-    [Fact]
-    public async Task AddEntryAsync_Should_Add_Entry()
-    {
-        var context = CreateContext();
-
-        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
-        context.Habits.Add(habit);
-        await context.SaveChangesAsync();
-
-        var service = CreateService(context);
-
-        var date = new DateOnly(2025, 1, 1);
-
-        await service.AddEntryAsync(habit.Id, date);
-
-        var entry = await context.HabitEntries.FirstAsync();
-
-        Assert.Equal(date, entry.Date);
-    }
-
-    [Fact]
-    public async Task AddEntryAsync_Should_Throw_If_Duplicate()
-    {
-        var context = CreateContext();
-
-        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
-        context.Habits.Add(habit);
-        await context.SaveChangesAsync();
-
-        var date = new DateOnly(2025, 1, 1);
-
-        context.HabitEntries.Add(new HabitEntry
+        private ApplicationDbContext CreateContext()
         {
-            HabitId = habit.Id,
-            Date = date
-        });
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
-        await context.SaveChangesAsync();
+            var mockCurrentUser = new Mock<ICurrentUserService>();
+            mockCurrentUser.Setup(x => x.UserId).Returns(UserId);
 
-        var service = CreateService(context);
+            return new ApplicationDbContext(options, mockCurrentUser.Object);
+        }
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.AddEntryAsync(habit.Id, date));
-    }
-
-
-    [Fact]
-    public async Task AddEntryAsync_Should_Throw_If_HabitId_NotExists()
-    {
-        var context = CreateContext();
-
-        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
-        context.Habits.Add(habit);
-        await context.SaveChangesAsync();
-
-        var date = new DateOnly(2025, 1, 1);
-
-        context.HabitEntries.Add(new HabitEntry
+        private static HabitEntryService CreateService(ApplicationDbContext context)
         {
-            HabitId = habit.Id,
-            Date = date
-        });
+            return new HabitEntryService(context);
+        }
 
-        await context.SaveChangesAsync();
-
-        var service = CreateService(context);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            service.AddEntryAsync(999, date));
-    }
-
-    [Fact]
-    public async Task RemoveEntryAsync_Should_Remove_Entry()
-    {
-        var context = CreateContext();
-
-        var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
-        context.Habits.Add(habit);
-        await context.SaveChangesAsync();
-
-        var date = new DateOnly(2025, 1, 1);
-
-        context.HabitEntries.Add(new HabitEntry
+        [Fact]
+        public async Task GetEntriesAsync_InvalidMonth_ShouldThrow()
         {
-            HabitId = habit.Id,
-            Date = date
-        });
+            var context = CreateContext();
+            var service = CreateService(context);
 
-        await context.SaveChangesAsync();
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                service.GetEntriesAsync(1, "invalid"));
+        }
 
-        var service = CreateService(context);
+        [Fact]
+        public async Task GetEntriesAsync_Should_Return_Only_Month_Entries()
+        {
+            var context = CreateContext();
 
-        await service.RemoveEntryAsync(habit.Id, date);
+            var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
+            context.Habits.Add(habit);
+            await context.SaveChangesAsync();
 
-        var entries = await context.HabitEntries.ToListAsync();
+            context.HabitEntries.AddRange(
+                new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 1, 5) },
+                new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 1, 10) },
+                new HabitEntry { HabitId = habit.Id, Date = new DateOnly(2025, 2, 1) } // different month
+            );
 
-        Assert.Empty(entries);
+            await context.SaveChangesAsync();
+
+            var service = CreateService(context);
+
+            var result = await service.GetEntriesAsync(habit.Id, "2025-01");
+
+            Assert.Equal(2, result.Count);
+            Assert.DoesNotContain(new DateOnly(2025, 2, 1), result);
+        }
+
+        [Fact]
+        public async Task AddEntryAsync_Should_Add_Entry()
+        {
+            var context = CreateContext();
+
+            var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
+            context.Habits.Add(habit);
+            await context.SaveChangesAsync();
+
+            var service = CreateService(context);
+
+            var date = new DateOnly(2025, 1, 1);
+
+            await service.AddEntryAsync(habit.Id, date);
+
+            var entry = await context.HabitEntries.FirstAsync();
+
+            Assert.Equal(date, entry.Date);
+        }
+
+        [Fact]
+        public async Task AddEntryAsync_Should_Throw_If_Duplicate()
+        {
+            var context = CreateContext();
+
+            var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
+            context.Habits.Add(habit);
+            await context.SaveChangesAsync();
+
+            var date = new DateOnly(2025, 1, 1);
+
+            context.HabitEntries.Add(new HabitEntry
+            {
+                HabitId = habit.Id,
+                Date = date
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = CreateService(context);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.AddEntryAsync(habit.Id, date));
+        }
+
+
+        [Fact]
+        public async Task AddEntryAsync_Should_Throw_If_HabitId_NotExists()
+        {
+            var context = CreateContext();
+
+            var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
+            context.Habits.Add(habit);
+            await context.SaveChangesAsync();
+
+            var date = new DateOnly(2025, 1, 1);
+
+            context.HabitEntries.Add(new HabitEntry
+            {
+                HabitId = habit.Id,
+                Date = date
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = CreateService(context);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                service.AddEntryAsync(999, date));
+        }
+
+        [Fact]
+        public async Task RemoveEntryAsync_Should_Remove_Entry()
+        {
+            var context = CreateContext();
+
+            var habit = new Habit { Name = "Test", GoalCount = 5, UserId = UserId };
+            context.Habits.Add(habit);
+            await context.SaveChangesAsync();
+
+            var date = new DateOnly(2025, 1, 1);
+
+            context.HabitEntries.Add(new HabitEntry
+            {
+                HabitId = habit.Id,
+                Date = date
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = CreateService(context);
+
+            await service.RemoveEntryAsync(habit.Id, date);
+
+            var entries = await context.HabitEntries.ToListAsync();
+
+            Assert.Empty(entries);
+        }
+
+        [Fact]
+        public async Task RemoveEntryAsync_Should_Throw_If_NotFound()
+        {
+            var context = CreateContext();
+            var service = CreateService(context);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+                service.RemoveEntryAsync(1, new DateOnly(2025, 1, 1)));
+        }
+
     }
-
-    [Fact]
-    public async Task RemoveEntryAsync_Should_Throw_If_NotFound()
-    {
-        var context = CreateContext();
-        var service = CreateService(context);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            service.RemoveEntryAsync(1, new DateOnly(2025, 1, 1)));
-    }
-
-
-
-
 }

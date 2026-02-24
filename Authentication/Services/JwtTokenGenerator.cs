@@ -1,37 +1,32 @@
 ﻿using Authentication.Models;
-using Authentication.Service.IService;
+using Authentication.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Authentication.Service
+namespace Authentication.Services
 {
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly JwtOptions _jwtOptions;
-        public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
-        {
-            _jwtOptions = jwtOptions.Value;
-        }
+        public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) => _jwtOptions = jwtOptions.Value;
 
         public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
         {
             try
             {
-
-
                 var tokenHandler = new JwtSecurityTokenHandler();
 
                 var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
 
                 var claimList = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Email,applicationUser.Email),
-                new Claim(JwtRegisteredClaimNames.Sub,applicationUser.Id),
-                new Claim(JwtRegisteredClaimNames.Name,applicationUser.UserName)
-            };
+                {
+                    new(JwtRegisteredClaimNames.Email,applicationUser.Email?? ""),
+                    new(JwtRegisteredClaimNames.Sub,applicationUser.Id ?? ""),
+                    new(JwtRegisteredClaimNames.Name,applicationUser.UserName ?? "")
+                };
 
                 claimList.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -50,7 +45,7 @@ namespace Authentication.Service
             catch (Exception ex)
             {
                 Console.WriteLine($"Error generating token: {ex.Message}");
-                return null;
+                return ""; // what to return 
                 //throw;
             }
         }

@@ -1,6 +1,6 @@
 ﻿using Authentication.Models.Dto;
 
-namespace Authentication.Service.IService
+namespace Authentication.Services.Interfaces
 {
     public interface IAuthService
     {

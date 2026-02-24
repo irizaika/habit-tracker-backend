@@ -1,4 +1,5 @@
 ﻿using HabitHole.Models.Dto;
+using HabitHole.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,14 +8,11 @@ namespace HabitHole.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class HabitSummaryController : ControllerBase
+    public class HabitMonthlySummaryController : ControllerBase
     {
-        private readonly IHabitSummaryService _service;
+        private readonly IHabitMonthlySummaryService _service;
 
-        public HabitSummaryController(IHabitSummaryService service)
-        {
-            _service = service;
-        }
+        public HabitMonthlySummaryController(IHabitMonthlySummaryService service) => _service = service;
 
         [HttpGet("monthly-summary")]
         [ProducesResponseType(typeof(HabitMonthlySummaryDto[]), StatusCodes.Status200OK)]

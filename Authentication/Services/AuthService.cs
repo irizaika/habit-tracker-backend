@@ -1,10 +1,10 @@
 ﻿using Authentication.Data;
 using Authentication.Models;
 using Authentication.Models.Dto;
-using Authentication.Service.IService;
+using Authentication.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
-namespace Authentication.Service
+namespace Authentication.Services
 {
     public class AuthService : IAuthService
     {
@@ -14,7 +14,7 @@ namespace Authentication.Service
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
         public AuthService(AppDbContext db, IJwtTokenGenerator jwtTokenGenerator,
-            UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+            UserManager<ApplicationUser> userManager/*, RoleManager<IdentityRole> roleManager*/)
         {
             _db = db;
             _jwtTokenGenerator = jwtTokenGenerator;
@@ -41,7 +41,7 @@ namespace Authentication.Service
 
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == loginRequestDto.UserName.ToLower());
+            var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName != null && u.UserName.ToLower() == loginRequestDto.UserName.ToLower());
 
             if (user == null )
             {
@@ -61,13 +61,13 @@ namespace Authentication.Service
 
             UserDto userDTO = new()
             {
-                Email = user.Email,
+                Email = user.Email ?? "",
                 ID = user.Id,
                 Name = user.Name,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber ?? ""
             };
 
-            LoginResponseDto loginResponseDto = new LoginResponseDto()
+            LoginResponseDto loginResponseDto = new()
             {
                 Result = new UserResponseDto()
                 {
@@ -114,10 +114,10 @@ namespace Authentication.Service
 
                     UserDto userDto = new()
                     {
-                        Email = userToReturn.Email,
+                        Email = userToReturn.Email ?? "",
                         ID = userToReturn.Id,
                         Name = userToReturn.Name,
-                        PhoneNumber = userToReturn.PhoneNumber
+                        PhoneNumber = userToReturn.PhoneNumber ?? ""
                     };
 
                     return new RegisterResponseDto()
@@ -131,7 +131,7 @@ namespace Authentication.Service
                 {
                     return new RegisterResponseDto()
                     {
-                        Messages = result.Errors.Select(e => e.Description).ToList(),
+                        Messages = [.. result.Errors.Select(e => e.Description)],
                         IsSuccessful = false
                     };
                 }
@@ -139,7 +139,7 @@ namespace Authentication.Service
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine($"Error registering user: {ex.Message}");
             }
 
             return new RegisterResponseDto()

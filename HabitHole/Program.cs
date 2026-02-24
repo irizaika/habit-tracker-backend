@@ -1,5 +1,5 @@
 using HabitHole.Data;
-using HabitHole.Extensions;
+using HabitHole.Extentions;
 using HabitHole.Services;
 using HabitHole.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,7 +22,8 @@ Batteries.Init();
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<Mapper, Mapper>();
 builder.Services.AddScoped<IHabitEntryService, HabitEntryService>();
-builder.Services.AddScoped<IHabitSummaryService, HabitSummaryService>();
+builder.Services.AddScoped<IHabitMonthlySummaryService, HabitMonthlySummaryService>();
+builder.Services.AddScoped<IHabitYearlySummaryService, HabitYearlySummaryService>();
 builder.Services.AddScoped<IDateProvider, DateProvider>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -51,7 +52,7 @@ builder.Services.AddSwaggerGen(
                     Type=ReferenceType.SecurityScheme,
                     Id=JwtBearerDefaults.AuthenticationScheme
                 }
-            }, new string[]{}
+            }, Array.Empty<string>()
         }
     });
      });

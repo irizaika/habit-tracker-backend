@@ -1,7 +1,7 @@
 using Authentication.Data;
 using Authentication.Models;
-using Authentication.Service;
-using Authentication.Service.IService;
+using Authentication.Services.Interfaces;
+using Authentication.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -70,7 +70,7 @@ void ApplyMigrations(IApplicationBuilder app)
     using (var scope = app.ApplicationServices.CreateScope())
     {
         var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        if (_db.Database.GetPendingMigrations().Count() > 0)
+        if (_db.Database.GetPendingMigrations().Any())
         {
             _db.Database.Migrate();
         }

@@ -3,7 +3,7 @@
     public class HabitDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int GoalCount { get; set; }
         public int GoalPeriodType { get; set; }
         public DateOnly CreatedAt { get; set; }

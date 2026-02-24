@@ -1,4 +1,5 @@
 using HabitHole.Models.Dto;
+using HabitHole.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,7 +32,7 @@ namespace HabitHole.Controllers
         [ProducesResponseType(typeof(HabitDto), StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateHabit(CreateHabitDto dto)
         {
-            var habit = await _habitService.CreateHabitAsync(dto.Name, dto.GoalCount, dto.validFrom, dto.validTo);
+            var habit = await _habitService.CreateHabitAsync(dto.Name, dto.GoalCount, dto.ValidFrom, dto.ValidTo);
             return CreatedAtAction(nameof(GetHabits), new { id = habit.Id }, habit);
         }
 
@@ -40,7 +41,7 @@ namespace HabitHole.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> UpdateHabit(int id, UpdateHabitDto dto)
         {
-            await _habitService.UpdateHabitAsync(id, dto.Name, dto.GoalCount, dto.validFrom, dto.validTo);
+            await _habitService.UpdateHabitAsync(id, dto.Name, dto.GoalCount, dto.ValidFrom, dto.ValidTo);
             return NoContent();
         }
 
@@ -55,6 +56,6 @@ namespace HabitHole.Controllers
     }
 
     public record GetHabitsDto(int Month, int Year); 
-    public record CreateHabitDto(string Name, int GoalCount, DateOnly validFrom, DateOnly? validTo); 
-    public record UpdateHabitDto(string Name, int GoalCount, DateOnly validFrom, DateOnly? validTo);
+    public record CreateHabitDto(string Name, int GoalCount, DateOnly ValidFrom, DateOnly? ValidTo); 
+    public record UpdateHabitDto(string Name, int GoalCount, DateOnly ValidFrom, DateOnly? ValidTo);
 }
