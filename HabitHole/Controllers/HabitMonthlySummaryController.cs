@@ -43,5 +43,13 @@ namespace HabitHole.Controllers
         }
 
 
+        [HttpGet("monthly-consistency")]
+        [ProducesResponseType(typeof(List<DailyConsistencyDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetMonthlyConsistency(int year, int month)
+        {
+            var result = await _service.GetMonthlyConsistency(year, month);
+            return Ok(result);
+        }
+
     }
 }

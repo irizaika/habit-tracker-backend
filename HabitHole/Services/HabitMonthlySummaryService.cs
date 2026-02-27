@@ -111,6 +111,58 @@ namespace HabitHole.Services
             return CalculateCurrentStreak(entries, now);
         }
 
+        public async Task<List<DailyConsistencyDto>> GetMonthlyConsistency(int year, int month)
+        {
+            var start = new DateOnly(year, month, 1);
+            var end = start.AddMonths(1).AddDays(-1);
+
+            // Load habits once
+            var habits = await _context.Habits
+                .Where(h => h.ValidFrom <= end && (h.ValidTo == null || h.ValidTo >= start))
+                .ToListAsync();
+
+            var habitIdList = habits.Select(i => i.Id);
+
+            // Load entries once
+            var entries = await _context.HabitEntries
+                .Where(e => e.Date >= start && e.Date <= end && habitIdList.Contains(e.HabitId))
+                .ToListAsync();
+
+            var result = new List<DailyConsistencyDto>();
+
+            for (var day = start; day <= end; day = day.AddDays(1))
+            {
+                // Active habits that day
+                var activeHabitsCount = habits
+                    .Count(h => h.ValidFrom <= day && (h.ValidTo == null || h.ValidTo >= day));
+
+                if (activeHabitsCount == 0)
+                {
+                    result.Add(new DailyConsistencyDto
+                    {
+                        Date = day.ToString("yyyy-MM-dd"),
+                        Value = 0
+                    });
+                    continue;
+                }
+
+                // Completed habits that day
+                var completedCount = entries.Count(e => e.Date == day);
+
+                var percentage = (int)Math.Round( (double)completedCount / activeHabitsCount * 100 );
+
+                result.Add(new DailyConsistencyDto
+                {
+                    Date = day.ToString("yyyy-MM-dd"),
+                    Value = percentage
+                });
+            }
+
+            return result;
+        }
+
+
+
         private static int CalculateCurrentStreak(
             IEnumerable<DateOnly> completedDates,
             DateOnly today)

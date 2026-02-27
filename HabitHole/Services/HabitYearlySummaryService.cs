@@ -99,5 +99,112 @@ namespace HabitHole.Services
 
             return result;
         }
+
+
+        public async Task<List<HabitMonthlyConsistencyDto>> GetYearlyMonthlyConsistency(int year)
+        {
+            var startOfYear = new DateOnly(year, 1, 1);
+            var endOfYear = new DateOnly(year, 12, 31);
+
+            var habits = await _context.Habits
+                .Where(h => h.ValidFrom <= endOfYear &&
+                            (h.ValidTo == null || h.ValidTo >= startOfYear))
+                .ToListAsync();
+
+            var entries = await _context.HabitEntries
+                .Where(e => e.Date.Year == year)
+                .ToListAsync();
+
+            var result = new List<HabitMonthlyConsistencyDto>();
+
+            // ALL HABITS COMBINED 
+            var allSeries = new HabitMonthlyConsistencyDto
+            {
+                Name = "All"
+            };
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var monthStart = new DateOnly(year, month, 1);
+                var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+                var activeHabits = habits
+                    .Where(h => h.ValidFrom <= monthEnd &&
+                                (h.ValidTo == null || h.ValidTo >= monthStart))
+                    .ToList();
+
+                int totalPossible = 0;
+                int totalCompleted = 0;
+
+                for (var day = monthStart; day <= monthEnd; day = day.AddDays(1))
+                {
+                    var activeThatDay = activeHabits.Count(h =>
+                        h.ValidFrom <= day &&
+                        (h.ValidTo == null || h.ValidTo >= day));
+
+                    totalPossible += activeThatDay;
+
+                    totalCompleted += entries.Count(e => e.Date == day);
+                }
+
+                int percent = totalPossible == 0
+                    ? 0
+                    : (int)Math.Round((double)totalCompleted / totalPossible * 100);
+
+                allSeries.Data.Add(new MonthlyConsistencyDto
+                {
+                    Month = monthStart.ToString("MMM"), //month.ToString("00"),
+                    Percent = percent
+                });
+            }
+
+            result.Add(allSeries);
+
+            // PER HABIT 
+            foreach (var habit in habits)
+            {
+                var series = new HabitMonthlyConsistencyDto
+                {
+                    Name = habit.Name
+                };
+
+                for (int month = 1; month <= 12; month++)
+                {
+                    var monthStart = new DateOnly(year, month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+                    var daysActive = 0;
+                    var completed = 0;
+
+                    for (var day = monthStart; day <= monthEnd; day = day.AddDays(1))
+                    {
+                        if (habit.ValidFrom <= day &&
+                            (habit.ValidTo == null || habit.ValidTo >= day))
+                        {
+                            daysActive++;
+                            completed += entries.Count(e =>
+                                e.HabitId == habit.Id && e.Date == day);
+                        }
+                    }
+
+                    int percent = daysActive == 0
+                        ? 0
+                        : (int)Math.Round((double)completed / daysActive * 100);
+
+                    series.Data.Add(new MonthlyConsistencyDto
+                    {
+                        Month = monthStart.ToString("MMM"), //month.ToString("00"),
+                        Percent = percent
+                    });
+                }
+
+                result.Add(series);
+            }
+
+            return result;
+        }
+
+
+
     }
 }

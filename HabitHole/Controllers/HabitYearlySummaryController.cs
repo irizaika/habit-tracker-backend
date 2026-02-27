@@ -32,5 +32,14 @@ namespace HabitHole.Controllers
             var result = await _service.GetYearlyHabitCalendar(year);
             return result;
         }
+
+        [HttpGet("yearly-monthly-habit-summary")]
+        [ProducesResponseType(typeof(List<HabitMonthlyConsistencyDto>), StatusCodes.Status200OK)]
+        public async Task<List<HabitMonthlyConsistencyDto>> GetYearlyMonthlyConsistency(int year)
+        {
+            var result = await _service.GetYearlyMonthlyConsistency(year);
+            return result;
+        }
+
     }
 }
