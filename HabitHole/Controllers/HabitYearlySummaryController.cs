@@ -41,5 +41,13 @@ namespace HabitHole.Controllers
             return result;
         }
 
+        [HttpGet("yearly-monthly-bars")]
+        [ProducesResponseType(typeof(List<HabitMonthlyBarDto>), StatusCodes.Status200OK)]
+        public async Task<List<HabitMonthlyBarDto>> GetYearlyMonthlyBars(int year)
+        {
+            var result = await _service.GetMonthlyHabitBars(year);
+            return result;
+        }
+
     }
 }

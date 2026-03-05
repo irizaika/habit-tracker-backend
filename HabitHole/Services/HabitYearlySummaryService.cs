@@ -1,4 +1,5 @@
 ﻿using HabitHole.Data;
+using HabitHole.Models;
 using HabitHole.Models.Dto;
 using HabitHole.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -63,10 +64,8 @@ namespace HabitHole.Services
                 //    })
                 //    .ToListAsync(); 
 
-                var habits = _context.Habits.Select(i => i.Id); // filter by user
-
                 var flatData = await _context.HabitEntries
-                    .Where(e => e.Date >= start && e.Date <= end && habits.Contains(e.HabitId))
+                    .Where(e => e.Date >= start && e.Date <= end)
                     .Select(e => new
                     {
                         HabitName = e.Habit.Name,
@@ -133,7 +132,7 @@ namespace HabitHole.Services
                                 (h.ValidTo == null || h.ValidTo >= monthStart))
                     .ToList();
 
-                int totalPossible = 0;
+                int totalGoal = 0;
                 int totalCompleted = 0;
 
                 for (var day = monthStart; day <= monthEnd; day = day.AddDays(1))
@@ -142,19 +141,23 @@ namespace HabitHole.Services
                         h.ValidFrom <= day &&
                         (h.ValidTo == null || h.ValidTo >= day));
 
-                    totalPossible += activeThatDay;
+
 
                     totalCompleted += entries.Count(e => e.Date == day);
                 }
 
-                int percent = totalPossible == 0
+                totalGoal += activeHabits.Sum(i => i.GoalCount);
+
+                int percent = totalGoal == 0
                     ? 0
-                    : (int)Math.Round((double)totalCompleted / totalPossible * 100);
+                    : (int)Math.Round((double)totalCompleted / totalGoal * 100);
 
                 allSeries.Data.Add(new MonthlyConsistencyDto
                 {
                     Month = monthStart.ToString("MMM"), //month.ToString("00"),
-                    Percent = percent
+                    Percent = percent,
+                    Completed = totalCompleted,
+                    Goal = totalGoal
                 });
             }
 
@@ -173,7 +176,7 @@ namespace HabitHole.Services
                     var monthStart = new DateOnly(year, month, 1);
                     var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
-                    var daysActive = 0;
+                    var goal = 0;
                     var completed = 0;
 
                     for (var day = monthStart; day <= monthEnd; day = day.AddDays(1))
@@ -181,20 +184,25 @@ namespace HabitHole.Services
                         if (habit.ValidFrom <= day &&
                             (habit.ValidTo == null || habit.ValidTo >= day))
                         {
-                            daysActive++;
+                            goal = habit.GoalCount;
                             completed += entries.Count(e =>
                                 e.HabitId == habit.Id && e.Date == day);
                         }
                     }
 
-                    int percent = daysActive == 0
+                    if (completed > goal)
+                        completed = goal;
+
+                    int percent = goal == 0
                         ? 0
-                        : (int)Math.Round((double)completed / daysActive * 100);
+                        : (int)Math.Round((double)completed / goal * 100);
 
                     series.Data.Add(new MonthlyConsistencyDto
                     {
                         Month = monthStart.ToString("MMM"), //month.ToString("00"),
-                        Percent = percent
+                        Percent = percent,
+                        Completed = completed,
+                        Goal = goal
                     });
                 }
 
@@ -204,7 +212,53 @@ namespace HabitHole.Services
             return result;
         }
 
+        public async Task<List<HabitMonthlyBarDto>> GetMonthlyHabitBars(int year)
+        {
+            var startOfYear = new DateOnly(year, 1, 1);
+            var endOfYear = new DateOnly(year, 12, 31);
 
+            var habits = await _context.Habits
+                .Where(h => h.ValidFrom <= endOfYear &&
+                            (h.ValidTo == null || h.ValidTo >= startOfYear))
+                .ToListAsync();
+
+            var entries = await _context.HabitEntries
+          .Where(e => e.Date.Year == year)
+          .ToListAsync();
+
+            var result = new List<HabitMonthlyBarDto>();
+
+            foreach (var habit in habits)
+            {
+                for (int month = 1; month <= 12; month++)
+                {
+                    var monthStart = new DateOnly(year, month, 1);
+                    var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+                    var activeHabits = habits
+                        .Where(h => h.ValidFrom <= monthEnd &&
+                                    (h.ValidTo == null || h.ValidTo >= monthStart))
+                        .ToList();
+
+                    var completed = await _context.HabitEntries
+                    .Where(e =>
+                        e.HabitId == habit.Id &&
+                        e.Date.Year == year &&
+                        e.Date.Month == month)
+                    .CountAsync();
+
+                    result.Add(new HabitMonthlyBarDto
+                    {
+                        Month = monthStart.ToString("MMM"),
+                        HabitName = habit.Name,
+                        Completed = completed,
+                        Goal = (habit.GoalCount < monthEnd.Day) ? habit.GoalCount : monthEnd.Day
+                    }); //
+                }
+            }
+
+            return result;
+        }
 
     }
 }
