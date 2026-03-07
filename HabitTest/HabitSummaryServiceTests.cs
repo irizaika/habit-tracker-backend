@@ -124,16 +124,20 @@ namespace HabitTest
         }
 
         // Monthly summary tests
-        [Fact]
-        public async Task GetMonthlySummaryAsync_InvalidMonth_ShouldThrow()
-        {
-            var context = GetDbContext();
-            var fixedToday = new DateOnly(2025, 1, 10);
-            var service = CreateService(context, fixedToday);
+        //[Fact]
+        //public async Task GetMonthlySummaryAsync_InvalidMonth_ShouldThrow()
+        //{
+        //    var context = GetDbContext();
+        //    var fixedToday = new DateOnly(2025, 1, 10);
+        //    var service = CreateService(context, fixedToday);
 
-            await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.GetMonthlySummaryAsync("invalid-month", false));
-        }
+            
+        //    var start = new DateOnly(2025, 1, 1);
+        //    var end = new DateOnly(2025, 1, 31);
+
+        //    await Assert.ThrowsAsync<ArgumentException>(() =>
+        //        service.GetMonthlySummaryAsync(, , false));
+        //}
 
         [Fact]
         public async Task Should_Exclude_Inactive_Habits_When_Flag_False()
@@ -154,7 +158,10 @@ namespace HabitTest
             context.Habits.Add(habit);
             await context.SaveChangesAsync();
 
-            var result = await service.GetMonthlySummaryAsync("2025-01", false);
+            var start = new DateOnly(2025, 1, 1);
+            var end = new DateOnly(2025, 1, 31);
+
+            var result = await service.GetMonthlySummaryAsync(start, end, false);
 
             Assert.Empty(result);
         }
@@ -178,7 +185,10 @@ namespace HabitTest
             context.Habits.Add(habit);
             await context.SaveChangesAsync();
 
-            var result = await service.GetMonthlySummaryAsync("2025-01", true);
+            var start = new DateOnly(2025, 1, 1);
+            var end = new DateOnly(2025, 1, 31);
+
+            var result = await service.GetMonthlySummaryAsync(start, end, true);
 
             Assert.Single(result);
         }
@@ -212,7 +222,10 @@ namespace HabitTest
 
             await context.SaveChangesAsync();
 
-            var result = (await service.GetMonthlySummaryAsync("2025-01", false)).First();
+            var start = new DateOnly(2025, 1, 1);
+            var end = new DateOnly(2025, 1, 31);
+
+            var result = (await service.GetMonthlySummaryAsync(start, end, false)).First();
 
             Assert.Equal(5, result.CompletedCount);
             Assert.Equal(50, result.ProgressPercent);
@@ -223,6 +236,8 @@ namespace HabitTest
         {
             var context = GetDbContext();
             var fixedToday = new DateOnly(2025, 1, 10);
+            var start = new DateOnly(2025, 1, 1);
+            var end = new DateOnly(2025, 1, 31);
             var service = CreateService(context, fixedToday);
 
             var habit = new Habit
@@ -244,7 +259,7 @@ namespace HabitTest
 
             await context.SaveChangesAsync();
 
-            var result = (await service.GetMonthlySummaryAsync(fixedToday.ToString("yyyy-MM"), false)).First();
+            var result = (await service.GetMonthlySummaryAsync(start, end, false)).First();
 
             Assert.Equal(3, result.Streak);
         }
@@ -267,7 +282,11 @@ namespace HabitTest
             context.Habits.Add(habit);
             await context.SaveChangesAsync();
 
-            var result = (await service.GetMonthlySummaryAsync("2025-02", false)).First();
+            var start = new DateOnly(2025, 2, 1);
+            var end = new DateOnly(2025, 2, 28);
+
+
+            var result = (await service.GetMonthlySummaryAsync(start, end, false)).First();
 
             Assert.Equal(28, result.DailyMap.Count); // Feb 2025
         }
