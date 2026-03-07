@@ -78,7 +78,7 @@
       "templateDirectory": null,
       "serviceHost": null,
       "serviceSchemes": null,
-      "output": "../../habit-hole-ui/src/api/authApi.ts",
+      "output": "../../habit-hole-ui/src/api/generated/authApi.ts",
       "newLineBehavior": "Auto"
     }
   }

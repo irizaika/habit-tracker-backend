@@ -16,53 +16,62 @@ namespace HabitHole.Services
             _dateProvider = dateProvider;
         }
 
-        public async Task<IEnumerable<HabitMonthlySummaryDto>> GetMonthlySummaryAsync(
-            string month,
-            bool includeInactive)
-        {
-            if (!DateOnly.TryParse($"{month}-01", out var firstDay))
-                throw new ArgumentException("Invalid month format");
 
+        //todo adjust for more clear weekly summary
+        public async Task<IEnumerable<HabitMonthlySummaryDto>> GetMonthlySummaryAsync(
+            DateOnly start, DateOnly end, bool includeInactive)
+        {
             var now = _dateProvider.Today;
 
-            var start = firstDay;
-            var end = firstDay.AddMonths(1).AddDays(-1);
+            var startOfMonth = new DateOnly(start.Year, start.Month, 1);
+            var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+            var lastDayOfMonth = endOfMonth.Day;
 
-            var daysInMonth = Enumerable
+            var daysInRange = Enumerable
                 .Range(0, end.DayNumber - start.DayNumber + 1)
                 .Select(offset => start.AddDays(offset))
                 .ToList();
+
+            if (lastDayOfMonth != daysInRange.Count)// it is for the dashboard
+            {
+                startOfMonth = new DateOnly(now.Year, now.Month, 1);
+                endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                var lastDayOfTheMonth = endOfMonth.Day;
+
+            }
 
             var habitsQuery = _context.Habits.AsQueryable();
 
             if (!includeInactive)
             {
                 habitsQuery = habitsQuery
-                    .Where(h => h.ValidFrom <= end &&
-                                (h.ValidTo == null || h.ValidTo >= start));
+                    .Where(h => h.ValidFrom <= endOfMonth &&
+                                (h.ValidTo == null || h.ValidTo >= endOfMonth));
             }
 
-            var habits = await habitsQuery
-                .Select(h => new
-                {
-                    h.Id,
-                    h.Name,
-                    h.ValidFrom,
-                    h.ValidTo,
-                    OriginalGoalCount = h.GoalCount,
-                    GoalCount = (h.GoalCount > daysInMonth.Count)
-                        ? daysInMonth.Count
-                        : h.GoalCount,
+                var habits = await habitsQuery
+                    .Select(h => new
+                    {
+                        h.Id,
+                        h.Name,
+                        h.ValidFrom,
+                        h.ValidTo,
+                        OriginalGoalCount = h.GoalCount,
+                        GoalCount = (h.GoalCount > lastDayOfMonth)
+                            ? lastDayOfMonth
+                            : h.GoalCount,
 
-                    MonthEntries = h.Entries
-                        .Where(e => e.Date >= start && e.Date <= end)
+                        MonthEntries = h.Entries
+                        .Where(e => e.Date >= startOfMonth && e.Date <= endOfMonth)
                         .Select(e => e.Date),
 
-                    AllEntriesUpToToday = h.Entries
-                        .Where(e => e.Date <= now)
-                        .Select(e => e.Date)
-                })
-                .ToListAsync();
+                        AllEntriesUpToToday = h.Entries
+                            .Where(e => e.Date <= now)
+                            .Select(e => e.Date)
+                    })
+
+                    .ToListAsync();
 
             return habits.Select(h =>
             {
@@ -70,7 +79,7 @@ namespace HabitHole.Services
                     .Select(d => d.ToString("yyyy-MM-dd"))
                     .ToHashSet();
 
-                var dailyMap = daysInMonth.ToDictionary(
+                var dailyMap = daysInRange.ToDictionary(
                     d => d.ToString("yyyy-MM-dd"),
                     d => completedThisMonth.Contains(d.ToString("yyyy-MM-dd"))
                 );

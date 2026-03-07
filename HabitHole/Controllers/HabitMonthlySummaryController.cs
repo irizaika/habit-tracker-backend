@@ -16,15 +16,11 @@ namespace HabitHole.Controllers
 
         [HttpGet("monthly-summary")]
         [ProducesResponseType(typeof(HabitMonthlySummaryDto[]), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMonthlySummary(
-           [FromQuery] string month,
-           [FromQuery] bool includeInactive = false)
+        public async Task<IActionResult> GetMonthlySummary(DateTime start, DateTime end, bool includeInactive)
         {
             try
             {
-                var result = await _service.GetMonthlySummaryAsync(
-                    month,
-                    includeInactive);
+                var result = await _service.GetMonthlySummaryAsync(DateOnly.FromDateTime(start), DateOnly.FromDateTime(end), includeInactive);
 
                 return Ok(result);
             }

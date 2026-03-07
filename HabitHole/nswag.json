@@ -78,7 +78,7 @@
       "templateDirectory": null,
       "serviceHost": null,
       "serviceSchemes": null,
-      "output": "../../habit-hole-ui/src/api/habitHoleApi.ts",
+      "output": "../../habit-hole-ui/src/api/generated/habitHoleApi.ts",
       "newLineBehavior": "Auto"
     }
   }

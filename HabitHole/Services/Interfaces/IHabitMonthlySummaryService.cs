@@ -5,7 +5,7 @@ namespace HabitHole.Services.Interfaces
     public interface IHabitMonthlySummaryService
     {
         Task<IEnumerable<HabitMonthlySummaryDto>> GetMonthlySummaryAsync(
-            string month, bool includeInactive);
+            DateOnly start, DateOnly end, bool includeInactive);
 
         Task<int> GetUpdatedStreakAsync(int habitId);
 
